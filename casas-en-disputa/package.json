@@ -1,0 +1,17 @@
+{
+  "name": "casas-en-disputa",
+  "version": "1.0.0",
+  "description": "**1. Estado inicial del tablero (10x10)**\r Decidí representar el tablero utilizando una **matriz bidimensional** (un arreglo que contiene 10 arreglos de 10 posiciones).",
+  "main": "index.js",
+  "scripts": {
+  "dev": "node --watch src/server.js",  
+  "start": "node src/server.js"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
