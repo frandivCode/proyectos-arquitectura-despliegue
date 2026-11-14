@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('./app'); // Importamos la app, pero no el server.js
+const app = require('./app');
 
 describe('Pruebas del Bot "Casas en Disputa"', () => {
 
@@ -35,7 +35,6 @@ describe('Pruebas del Bot "Casas en Disputa"', () => {
 
         const respuesta = await request(app).post('/move').send(estadoPrueba);
         expect(respuesta.statusCode).toBe(200);
-        // Esperamos que decida ir al Este para buscar la "N"
         expect(respuesta.body).toEqual({ "A1": "E" });
     });
 });

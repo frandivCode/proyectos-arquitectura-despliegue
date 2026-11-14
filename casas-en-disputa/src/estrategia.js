@@ -1,5 +1,4 @@
 function calcularNuevaPosicion(filaActual, columnaActual, pasos, direccion) {
-    // Mantenemos tu función matemática original por si la necesitan más adelante
     let nuevaFila = filaActual;
     let nuevaColumna = columnaActual;
 
@@ -11,7 +10,6 @@ function calcularNuevaPosicion(filaActual, columnaActual, pasos, direccion) {
     return [nuevaFila, nuevaColumna];
 }
 
-// Nueva función de apoyo: Calcula la distancia más corta (directa o dando la vuelta)
 function distanciaToroidal(pos1, pos2) {
     let directa = Math.abs(pos1 - pos2);
     return Math.min(directa, 10 - directa);
@@ -23,7 +21,6 @@ function elegirMovimiento(estadoTablero) {
     let misFichas = [];
     let casas = [];
 
-    // 1. Escanear el tablero
     for (let f = 0; f < 10; f++) {
         for (let c = 0; c < 10; c++) {
             if (tablero[f][c] === "N") {
@@ -36,16 +33,14 @@ function elegirMovimiento(estadoTablero) {
 
     let movimientos = {};
 
-    // 2. Tomar decisiones ficha por ficha
     for (let i = 0; i < misFichas.length; i++) {
         let ficha = misFichas[i];
 
         if (casas.length === 0) {
-            movimientos[ficha.id] = "N"; // Sin casas, movimiento por defecto
+            movimientos[ficha.id] = "N";
             continue;
         }
 
-        // Buscar la casa neutral más cercana
         let casaMasCercana = casas[0];
         let distanciaMinima = 100;
 
@@ -61,23 +56,19 @@ function elegirMovimiento(estadoTablero) {
             }
         }
 
-        // 3. Decidir la dirección (Ortogonal: un paso a la vez)[cite: 8]
         let dirFila = casaMasCercana.fila - ficha.fila;
         let dirCol = casaMasCercana.columna - ficha.columna;
 
         let distFilaToroidal = distanciaToroidal(ficha.fila, casaMasCercana.fila);
         let direccionElegida = "N";
 
-        // Elegir eje de movimiento priorizando emparejar primero la fila
         if (distFilaToroidal > 0) {
             if (dirFila > 0) {
-                // Si está lejos (> 5), damos la vuelta por el Norte. Si no, Sur.
                 direccionElegida = dirFila <= 5 ? "S" : "N";
             } else {
                 direccionElegida = Math.abs(dirFila) <= 5 ? "N" : "S";
             }
         } else {
-            // Si la fila ya es igual, nos movemos en la columna (Este u Oeste)
             if (dirCol > 0) {
                 direccionElegida = dirCol <= 5 ? "E" : "O";
             } else {
