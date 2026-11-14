@@ -1,6 +1,11 @@
 const app = require('./app');
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Bot escuchando en el puerto ${PORT}`);
-});
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Bot escuchando en el puerto ${PORT}`);
+    });
+}
+
+module.exports = app;
