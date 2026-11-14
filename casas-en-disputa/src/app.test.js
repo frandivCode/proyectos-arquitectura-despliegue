@@ -3,6 +3,12 @@ const app = require('./app'); // Importamos la app, pero no el server.js
 
 describe('Pruebas del Bot "Casas en Disputa"', () => {
 
+    test('GET / - Debe responder el HTML del navegador', async () => {
+        const respuesta = await request(app).get('/');
+        expect(respuesta.statusCode).toBe(200);
+        expect(respuesta.text).toContain('Casas en Disputa');
+    });
+
     test('GET /health - Debe responder estado 200 y OK', async () => {
         const respuesta = await request(app).get('/health');
         expect(respuesta.statusCode).toBe(200);

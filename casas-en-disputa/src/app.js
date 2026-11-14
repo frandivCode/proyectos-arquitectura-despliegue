@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { move } = require('./move');
 
 const app = express();
@@ -10,10 +11,16 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 app.get('/health', (req, res) => res.status(200).json({ status: "OK" }));
 
 // Conectamos la ruta con el controlador
 app.post('/move', move);
+
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use((req, res) => res.status(404).json({ error: "Ruta no encontrada" }));
 app.use((err, req, res, next) => res.status(500).json({ error: "Error interno del servidor" }));
