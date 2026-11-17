@@ -2,10 +2,10 @@ function calcularNuevaPosicion(filaActual, columnaActual, pasos, direccion) {
     let nuevaFila = filaActual;
     let nuevaColumna = columnaActual;
 
-    if (direccion == "N") { nuevaFila = (filaActual - pasos + 10) % 10; }
-    else if (direccion == "S") { nuevaFila = (filaActual + pasos + 10) % 10; }
-    else if (direccion == "E") { nuevaColumna = (columnaActual + pasos + 10) % 10; }
-    else { nuevaColumna = (columnaActual - pasos + 10) % 10; }
+    if (direccion === "N") { nuevaFila = (filaActual - pasos + 10) % 10; }
+    else if (direccion === "S") { nuevaFila = (filaActual + pasos + 10) % 10; }
+    else if (direccion === "E") { nuevaColumna = (columnaActual + pasos + 10) % 10; }
+    else if (direccion === "O") { nuevaColumna = (columnaActual - pasos + 10) % 10; }
 
     return [nuevaFila, nuevaColumna];
 }
@@ -18,65 +18,69 @@ function distanciaToroidal(pos1, pos2) {
 function elegirMovimiento(estadoTablero) {
     const jugador = estadoTablero.jugador;
     const tablero = estadoTablero.tablero;
+    const pasos = estadoTablero.dado || 1;
+    const rival = jugador === "A" ? "B" : "A";
+
     let misFichas = [];
     let casas = [];
+    let fichasRivales = new Set();
 
     for (let f = 0; f < 10; f++) {
         for (let c = 0; c < 10; c++) {
-            if (tablero[f][c] === "N") {
+            const celda = String(tablero[f][c] || "");
+            if (celda === "N") {
                 casas.push({ fila: f, columna: c });
-            } else if (tablero[f][c] !== "" && tablero[f][c].startsWith(jugador)) {
-                misFichas.push({ id: tablero[f][c], fila: f, columna: c });
+            } else if (celda.startsWith(jugador) && /^([AB])\d+$/.test(celda)) {
+                misFichas.push({ id: celda, fila: f, columna: c });
+            } else if (celda.startsWith(rival) && /^([AB])\d+$/.test(celda)) {
+                fichasRivales.add(`${f},${c}`);
             }
         }
     }
 
     let movimientos = {};
+    let destinosPropiosOcupados = new Set();
+    const direcciones = ["N", "S", "E", "O"];
 
     for (let i = 0; i < misFichas.length; i++) {
         let ficha = misFichas[i];
+        let mejorDireccion = null;
+        let mejorPuntaje = Infinity;
 
-        if (casas.length === 0) {
-            movimientos[ficha.id] = "N";
-            continue;
-        }
+        for (const dir of direcciones) {
+            const [destF, destC] = calcularNuevaPosicion(ficha.fila, ficha.columna, pasos, dir);
+            const claveDestino = `${destF},${destC}`;
 
-        let casaMasCercana = casas[0];
-        let distanciaMinima = 100;
+            if (fichasRivales.has(claveDestino) || destinosPropiosOcupados.has(claveDestino)) {
+                continue;
+            }
 
-        for (let j = 0; j < casas.length; j++) {
-            let casa = casas[j];
-            let distFila = distanciaToroidal(ficha.fila, casa.fila);
-            let distCol = distanciaToroidal(ficha.columna, casa.columna);
-            let distanciaTotal = distFila + distCol;
+            if (casas.length === 0) {
+                mejorDireccion = dir;
+                break;
+            }
 
-            if (distanciaTotal < distanciaMinima) {
-                distanciaMinima = distanciaTotal;
-                casaMasCercana = casa;
+            let distMinACasa = Infinity;
+            for (const casa of casas) {
+                const dist = distanciaToroidal(destF, casa.fila) + distanciaToroidal(destC, casa.columna);
+                if (dist < distMinACasa) {
+                    distMinACasa = dist;
+                }
+            }
+
+            if (distMinACasa < mejorPuntaje) {
+                mejorPuntaje = distMinACasa;
+                mejorDireccion = dir;
             }
         }
 
-        let dirFila = casaMasCercana.fila - ficha.fila;
-        let dirCol = casaMasCercana.columna - ficha.columna;
-
-        let distFilaToroidal = distanciaToroidal(ficha.fila, casaMasCercana.fila);
-        let direccionElegida = "N";
-
-        if (distFilaToroidal > 0) {
-            if (dirFila > 0) {
-                direccionElegida = dirFila <= 5 ? "S" : "N";
-            } else {
-                direccionElegida = Math.abs(dirFila) <= 5 ? "N" : "S";
-            }
-        } else {
-            if (dirCol > 0) {
-                direccionElegida = dirCol <= 5 ? "E" : "O";
-            } else {
-                direccionElegida = Math.abs(dirCol) <= 5 ? "O" : "E";
-            }
+        if (!mejorDireccion) {
+            mejorDireccion = "N";
         }
 
-        movimientos[ficha.id] = direccionElegida;
+        const [finalF, finalC] = calcularNuevaPosicion(ficha.fila, ficha.columna, pasos, mejorDireccion);
+        destinosPropiosOcupados.add(`${finalF},${finalC}`);
+        movimientos[ficha.id] = mejorDireccion;
     }
 
     return movimientos;
